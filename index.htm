@@ -1,0 +1,195 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>1D Bubble   -   Bubbling in 1 Dimension 2012</title>
+    <link href='http://fonts.googleapis.com/css?family=Unlock' rel='stylesheet' type='text/css'>
+ <style type="text/css">
+body { 
+  background: #222222; 
+
+  background-color:#282828;
+  background-size:16px 16px;
+
+  font: 11px verdana; 
+  color: white; 
+  margin-top: 60px; 
+}
+#canvas { border: #333333 1px solid; background: white; margin: 0px; }
+#topline {width:1000px;margin-top:45px; }
+#msg { font-size:25px; color: #ea5cc0; width: 600px;
+  text-shadow: #f0f0ff 0px 0px 30px;
+
+}
+.menubutton {padding:5px;width:30px;height:30px;opacity:0.5;cursor:pointer;float:left;background-color:#111;margin-right:5px} 
+.points, #msg {float:left;font-family: 'Unlock', cursive;height:55px; }
+.points {width:199px;font-size:22px;}
+#p1a,#p2a {color:#888;font-size:19px;padding-top:2px}
+#p1p {padding-right:8px}
+#p2p {padding-left:8px}
+#p1p,#p2p {letter-spacing:1px}
+#p1h {color:#22eb22}
+#p2h {color:#eb2222}
+#jaws-log { overflow: auto; color: #aaaaaa; width: 300px; height: 150px; margin: 40px auto 0px auto; padding: 5px; border: #444444 1px solid; clear: both; font: 10px verdana; text-align: left; }
+a,a:visited { color: orange; }
+header { width: 800px; color: #aaaaaa; }
+#gamecontrols {font-size:18px}
+a.geco {color:#eee;text-decoration:none}
+
+#infobox { font: 11px verdana; width: 1000px; color: #999; }
+#keyinfo, #instructions span { text-shadow: #666 1px 1px; }
+#keyinfo { width:200px}
+#keyinfo span {color:white}
+#instructions {width:400px;background-color:#111;padding:2px 20px 20px 20px;margin-top:18px}
+#instructions span {display:block;color:white;padding:6px 0 2px 0}
+th,  td {font-size:11px;background-color:black;text-align:center;padding:1px 8px}
+#enemyTable {margin-bottom:5px}
+canvas {
+  image-rendering: optimizeSpeed;
+  image-rendering: optimize-contrast;
+  image-rendering: -moz-crisp-edges;          // Firefox
+  image-rendering: -webkit-optimize-contrast; // Webkit, doesn't seem to work for canvas though :\
+  -ms-interpolation-mode: nearest-neighbor;   // IE
+}
+.ienemy {margin-left:10px;width:40px;height:4px;overflow:hidden;}
+
+</style>
+<script type="text/javascript">
+
+function toggleInstr() {
+	var ii = document.getElementById("instructions")
+	if ( ii.style.visibility == "visible") {
+		ii.style.visibility = "hidden"
+	} else {
+		ii.style.visibility = "visible"
+	}
+}
+
+var game_running = false; 
+function MonitorKeyDown(e)
+{
+	if ( game_running ) return ; 
+	if (!e) e=window.event;
+	var code;
+	if ((e.charCode) && (e.keyCode==0))
+	{
+		code = e.charCode;
+	} else {
+		code = e.keyCode;
+	}
+	if ( code == 83 || code == 67 ) {
+		startGame( code )
+	}
+}
+
+document.onkeydown = MonitorKeyDown;
+
+//save hiscore in cookie
+function WertHolen () {
+  var Wert = "";
+  if (document.cookie) {
+    var Wertstart = document.cookie.indexOf("=") + 1;
+    var Wertende = document.cookie.indexOf(";");
+    if (Wertende == -1)
+      Wertende = document.cookie.length;
+    Wert = document.cookie.substring(Wertstart, Wertende);
+  }
+  return Wert;
+}
+
+function WertSetzen (Bezeichner, Wert, Verfall) {
+  var jetzt = new Date();
+  var Auszeit = new Date(jetzt.getTime() + Verfall);
+  document.cookie = Bezeichner + "=" + Wert + "; expires=" + Auszeit.toGMTString() + ";";
+}
+
+</script>
+
+  </head>
+
+  <body data-rendering="true">
+    <center>
+      <header>
+        <img src="media/logo_x2.png" />
+      </header>
+
+	  <div id="gamecontrols">
+	  	<a class="geco" href="javascript:startGame()">PRESS <img src="media/startkey.png" align="middle" alt="S"/> TO START</a>
+	  </div>
+
+	  <div id="topline">
+	  	  <div class="points" style="text-align:left">
+	  	  	<div id="p1h">player</div>
+	  	  	<div id="p1p" style="float:left">000000</div><div id="p1a"></div>
+	  	  </div>
+    	  <div id="msg"></div>
+		   <div class="points" style="text-align:right">
+		   	<div id="p2h">hiscore</div>
+	  	  	<div id="p2p" style="float:right">000000</div><div id="p2a"></div>
+	  	  </div>
+	  </div>
+	  
+      <div id="container" style="width:1000px;padding-top:20px">
+      	<canvas  style="position:relative;z-index:100" id="canvas" width="1000" height="6"></canvas><br>
+       <div id="explosion" style="visibility:hidden;z-index:50;position:relative;left:0px;top:-30px;width:50px">
+       	<img src="media/explode.png" />
+       </div>
+      </div>
+       
+      <div id="infobox">
+		<div id="keyinfo">        
+	        In game keys: <br />
+	        <span>LEFT</span> &amp; <span>RIGHT</span>: Move 
+	        <br />
+	        <span>SPACE</span>: Shoot bubble, <span>P</span>: Pause
+			<br /><br />
+			<div style="width:90px;">
+			    <div id="sound" class="menubutton" onclick="toggleSound()"><img src="media/sound_on.png" /></div>
+			    <div id="pause" class="menubutton" onclick="toggleInstr()" style="color:white;font-size:25px">?</div>
+			</div>
+	    </div>
+	    
+	    <br /><br />
+
+		<div id="instructions" style="visibility:hidden">
+		
+			<span>Instructions:</span>
+			Shoot enemies with your bubbles. When enemy is in bubble, pop the bubble by touching it. 
+			
+			<span>Enemies:</span>
+			<table id="enemyTable">
+			<tr><th>Looks like</th><th>Hits</th><th>Name</th><th>Points</th>
+			</tr><tr>
+				<td>
+					<div class="ienemy"><img src="media/enemy1.png" width="50" /></div></td><td>1</td><td>Baby monster</td><td>50</td></tr>
+				<td>
+					<div class="ienemy" style="width:100px"><img src="media/enemy1.png" width="100" /></div></td><td>5</td><td>Monster mama</td><td>300</td></tr>
+				<td>
+					<div class="ienemy"><img src="media/enemy2.png" width="50" /></div></td><td>2</td><td>Red monster</td><td>150</td></tr>
+				<td>
+					<div class="ienemy" style="width:100px"><img src="media/enemy2.png" width="100" /></div></td><td>?</td><td>Monster papa</td><td>?</td></tr>
+				<td>
+					?</td><td>?</td><td>The big one!</td><td>?</td></tr>
+			</table>
+			<a href="http://globalgamejam.org/2012/1d-bobble">This game was part of global game jam 2012</a>
+
+		</div>
+
+<br /><br />
+        
+       </div>
+        
+
+  <div id="live_info"></div>
+      <!-- <div id="jaws-log"></div> -->
+    </center>
+    
+    <script src="./js/jaws.js" type="text/javascript"></script>
+    <script src="./js/game.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    	  var lasthiscore = WertHolen();
+    	  if ( ( lasthiscore.length > 7) || ( parseInt(lasthiscore ) > 9999999  )) {
+    	  	lasthiscore = 0
+    	  }
+		  p2points = lasthiscore
+		  showpoints( "p2", lasthiscore );
+    </script>
+
+</body></html>

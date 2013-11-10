@@ -1639,8 +1639,11 @@ function cutImage(image, x, y, width, height) {
   cut.height = height
   
   var ctx = cut.getContext("2d")
-  ctx.drawImage(image, x, y, width, height, 0, 0, cut.width, cut.height)
-  
+  try {
+    ctx.drawImage(image, x, y, width, height, 0, 0, cut.width, cut.height)
+  } catch (e) {
+    console.log("ERROR", e );
+  }
   return cut
 };
 

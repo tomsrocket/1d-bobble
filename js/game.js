@@ -7,8 +7,67 @@
 *
 */
 
-var GLOBAL_SCALE = 6
-var GLOBAL_WIDTH = 1000
+var GLOBAL_SCALE = 6;
+var GLOBAL_WIDTH = 1000;
+var WINDOW_WIDTH = 1000;
+var RATIO = 1;
+
+
+// get browser visible screen size
+function viewport() {
+	var e = window, a = 'inner';
+	if ( !( 'innerWidth' in window ) ) {
+		a = 'client';
+		e = document.documentElement || document.body;
+	}
+	return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
+}
+
+function resize_screen( width, height ) {
+	var vp = viewport(); 
+    var width = vp.width-20;
+    if ( width > 1000 ) { width=1000; }
+    var height = vp.height;
+    WINDOW_WIDTH = width;
+    RATIO = width/height;
+    $("#infodiv").html("ratio: "+ RATIO );
+    $("#container").css("width",""+width+"px");
+    $("#container canvas").css("width",width+"px");
+    $("#topline").css("width",width+"px");
+    $("#infobox").css("width",width+"px");
+
+    var topimage_width = 442;
+    if ( WINDOW_WIDTH < 600) {
+    	topimage_width *= ( WINDOW_WIDTH / 700 );
+    }
+    if ( WINDOW_WIDTH < 500) {
+    	$("#hidiv").css("display","none");
+    } else {
+    	$("#hidiv").css("display","block");
+    }
+    if ( (RATIO > 1) && (  WINDOW_WIDTH < 1000 )  ) {
+    	$("body").css("margin-top","5px");
+    	$("#topline").css("margin-top","0px");
+    	topimage_width = 200;
+    }
+
+    $("#header").css("width",topimage_width+"px");
+    $("#header img").width(topimage_width);
+    $("#msg").css("width", ""+(WINDOW_WIDTH-400)+"px")
+
+
+
+
+}
+
+
+resize_screen ();
+
+// setup handler to be called when window is resized
+$(window).resize (resize_screen);
+$(window).bind ('orientationchange', resize_screen);
+
+
 
 var STAGES = [
     {
@@ -276,7 +335,7 @@ function PlayState() {
     level_maxtime = level_infos[1] 
     level_enemies = leveldata.enemies
     
-    background_audio && background_audio.pause()
+//    background_audio && background_audio.pause()
     
     switch(level) {
       default:
@@ -299,15 +358,18 @@ function PlayState() {
     game_objects = new jaws.SpriteList()
     game_enemies = new jaws.SpriteList()
 
-    jaws.on_keydown("space", function() {
-    //		play_sound( "bubble" );
-    	
-	        var game_object = new Bubble({"x":player.x,"y":player.y, "vs":8, "flipped":player.flipped, "anchor":"center"});
-	        game_object.scaleImage(GLOBAL_SCALE)
-	        game_object.rect()
-	        game_objects.push(game_object) 
-    	}
-    )
+
+	function shoot_bubble() {
+//		play_sound( "bubble" );
+	
+        var game_object = new Bubble({"x":player.x,"y":player.y, "vs":8, "flipped":player.flipped, "anchor":"center"});
+        game_object.scaleImage(GLOBAL_SCALE)
+        game_object.rect()
+        game_objects.push(game_object) 
+    }
+
+    jaws.on_keydown("space", shoot_bubble );
+    $("#go_shoot").click( shoot_bubble );
 
     jaws.on_keydown("p", function() {
     	if ( !pausestart ) {
@@ -338,14 +400,29 @@ function PlayState() {
     player.x = GLOBAL_WIDTH / 4; 
     player.y = GLOBAL_SCALE/2
 
-    window.onblur = function()  { background_audio && background_audio.pause()  }
-    window.onfocus = function() { background_audio && background_audio.play() }
+//    window.onblur = function()  { background_audio && background_audio.pause()  }
+//    window.onfocus = function() { background_audio && background_audio.play() }
 
     initLevel( continuelevel )
   }
 
 
-  
+   	
+
+
+
+
+var button_pressed = "";
+$("#go_left").mousedown( function() {
+	button_pressed="left";
+});
+$("#go_right").mousedown( function() {
+   	button_pressed="right";
+});
+$(".in_game_key").mouseup( function( ) {
+	button_pressed="";
+});
+
   
   //
   //
@@ -358,11 +435,11 @@ function PlayState() {
     if(frame >= 0)          { player.setImage( player.animation.frames[frame] ) }
 
     player.vx = 0
-    if (jaws.pressed("left"))        { player.vx = -4; player.flipped = 1; }
-    else if (jaws.pressed("right"))  { player.vx = +4; player.flipped = 0; }
+    if (jaws.pressed("left") || button_pressed == "left")        { player.vx = -4; player.flipped = 1; }
+    else if (jaws.pressed("right") || button_pressed == "right")  { player.vx = +4; player.flipped = 0; }
     if (jaws.pressed("up"))  { if(!player.jumping && player.can_jump) { player.vy = -10; player.jumping = true; player.can_jump = false} }
     else { player.can_jump = true }
-   
+
     player.x += player.vx;
 
     if ( player.x > GLOBAL_WIDTH + 5) {
@@ -455,7 +532,7 @@ function PlayState() {
     });
  
   }
- 
+ 	
 }
 
 function create_monster( my_enemy ) {
@@ -476,8 +553,8 @@ function create_monster( my_enemy ) {
 	return game_e; 
 }
 
-function playsOGG() { var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/ogg; codecs="vorbis"' ) }
-function playsMP3() { var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/mpeg;' ) }
+function playsOGG() { return ;var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/ogg; codecs="vorbis"' ) }
+function playsMP3() { return ; var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/mpeg;' ) }
 
 
 function Bubble(options) {
@@ -601,7 +678,7 @@ function Endboss(options) {
 
 
 function player_died( xpos ) {
-	document.getElementById("explosion").style.left=xpos - (GLOBAL_WIDTH/2 )+"px";
+	document.getElementById("explosion").style.left=(xpos)*(WINDOW_WIDTH/1000)-20  +"px";
 	document.getElementById("explosion").style.visibility="visible";
 	var messages = [
 		            "Oh no!",
@@ -642,6 +719,7 @@ function show_game_controls( ) {
 }
 
 function play_sound( sound ) {
+	return ;
 	if ( !sound_on ) return; 
 	if(jaws.assets.get("audio/sfx_"+sound+".mp3")) {
 		jaws.assets.get("audio/sfx_"+sound+".mp3").play();
@@ -702,7 +780,7 @@ function showpoints(player, number ) {
 		game_running = true; 
 		var gc = document.getElementById("gamecontrols");
 		gc.style.visibility="hidden"
-		document.getElementById("explosion").style.visibility="hidden";
+		document.getElementById("explosion").style.left="-500px";
 		p1points = 0; 
 		showpoints( "p1", p1points );
 		jaws.assets.root = ""

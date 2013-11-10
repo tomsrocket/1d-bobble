@@ -11,6 +11,12 @@ body {
   font: 11px verdana; 
   color: white; 
   margin-top: 60px; 
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;  
 }
 #canvas { border: #333333 1px solid; background: white; margin: 0px; }
 #topline {width:1000px;margin-top:45px; }
@@ -29,15 +35,15 @@ body {
 #p2h {color:#eb2222}
 #jaws-log { overflow: auto; color: #aaaaaa; width: 300px; height: 150px; margin: 40px auto 0px auto; padding: 5px; border: #444444 1px solid; clear: both; font: 10px verdana; text-align: left; }
 a,a:visited { color: orange; }
-header { width: 800px; color: #aaaaaa; }
+#header { width: 442px; color: #aaaaaa; }
 #gamecontrols {font-size:18px}
 a.geco {color:#eee;text-decoration:none}
 
 #infobox { font: 11px verdana; width: 1000px; color: #999; }
 #keyinfo, #instructions span { text-shadow: #666 1px 1px; }
-#keyinfo { width:200px}
+#keyinfo { max-width:400px}
 #keyinfo span {color:white}
-#instructions {width:400px;background-color:#111;padding:2px 20px 20px 20px;margin-top:18px}
+#instructions {max-width:400px;background-color:#111;padding:2px 20px 20px 20px;margin-top:18px}
 #instructions span {display:block;color:white;padding:6px 0 2px 0}
 th,  td {font-size:11px;background-color:black;text-align:center;padding:1px 8px}
 #enemyTable {margin-bottom:5px}
@@ -49,8 +55,36 @@ canvas {
   -ms-interpolation-mode: nearest-neighbor;   // IE
 }
 .ienemy {margin-left:10px;width:40px;height:4px;overflow:hidden;}
+.in_game_key {width:80px;height:80px;text-align:center;}
+.in_game_key span {margin-left:20px;padding-top:10px;display:block;width:40px;height:30px;border-radius:7px;background-color:#888;color:white;font-weight:bold;}
+.in_game_key.lsi {float:left;}
+.in_game_key.rsi {float:right;}
 
 </style>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+  <script src="intelxdk.js"></script>
+  <script type="text/javascript">
+    /* This code is used to run as soon as Intel activates */
+    var onDeviceReady=function(){
+      //hide splash screen
+      intel.xdk.device.hideSplashScreen();
+    };
+    document.addEventListener("intel.xdk.device.ready",onDeviceReady,false);
+    
+    /* This code prevents users from dragging the page */
+    var preventDefaultScroll = function(event) {
+        event.preventDefault();
+        window.scroll(0,0);
+        return false;
+    };
+    document.addEventListener('touchmove', preventDefaultScroll, false);  
+  </script>
+    
+    
+    
+    
 <script type="text/javascript">
 
 function toggleInstr() {
@@ -106,12 +140,13 @@ function WertSetzen (Bezeichner, Wert, Verfall) {
 
   <body data-rendering="true">
     <center>
-      <header>
+      <div style="display:none" id="infodiv">asdf</div>
+      <div id="header">
         <img src="media/logo_x2.png" />
-      </header>
+      </div>
 
 	  <div id="gamecontrols">
-	  	<a class="geco" href="javascript:startGame()">PRESS <img src="media/startkey.png" align="middle" alt="S"/> TO START</a>
+	  	<a class="geco" href="javascript:startGame()">PRESS <img class="startkey" src="media/startkey.png" align="middle" alt="S"/> TO START</a>
 	  </div>
 
 	  <div id="topline">
@@ -120,7 +155,7 @@ function WertSetzen (Bezeichner, Wert, Verfall) {
 	  	  	<div id="p1p" style="float:left">000000</div><div id="p1a"></div>
 	  	  </div>
     	  <div id="msg"></div>
-		   <div class="points" style="text-align:right">
+		   <div id="hidiv" class="points" style="text-align:right">
 		   	<div id="p2h">hiscore</div>
 	  	  	<div id="p2p" style="float:right">000000</div><div id="p2a"></div>
 	  	  </div>
@@ -128,17 +163,31 @@ function WertSetzen (Bezeichner, Wert, Verfall) {
 	  
       <div id="container" style="width:1000px;padding-top:20px">
       	<canvas  style="position:relative;z-index:100" id="canvas" width="1000" height="6"></canvas><br>
-       <div id="explosion" style="visibility:hidden;z-index:50;position:relative;left:0px;top:-30px;width:50px">
-       	<img src="media/explode.png" />
-       </div>
+       	<div style="width:1px:height:1px;position:absolute">
+       		<div id="explosion" style="visibility:hidden;z-index:50;position:relative;left:0px;top:-30px;width:50px">
+       			<img src="media/explode.png" />
+       		</div>
+       	</div>
       </div>
        
       <div id="infobox">
 		<div id="keyinfo">        
 	        In game keys: <br />
-	        <span>LEFT</span> &amp; <span>RIGHT</span>: Move 
-	        <br />
-	        <span>SPACE</span>: Shoot bubble, <span>P</span>: Pause
+	        <div id="go_left" class="in_game_key lsi">
+	        	<span>&lt;-</span>
+	        	<i>move left</i>
+	        </div>
+	        <div id="go_right" class="in_game_key lsi">
+	        	<span>-&gt;</span>
+	        	<i>move right</i>
+	        </div>
+	        <div id="go_shoot" class="in_game_key rsi" >
+	        	<span>space</span>
+	        	<i>shoot bubble</i>
+	        </div>
+	        <br clear="both" />
+
+	        <span>P</span>: Pause
 			<br /><br />
 			<div style="width:90px;">
 			    <div id="sound" class="menubutton" onclick="toggleSound()"><img src="media/sound_on.png" /></div>
@@ -159,13 +208,13 @@ function WertSetzen (Bezeichner, Wert, Verfall) {
 			</tr><tr>
 				<td>
 					<div class="ienemy"><img src="media/enemy1.png" width="50" /></div></td><td>1</td><td>Baby monster</td><td>50</td></tr>
-				<td>
+				<tr><td>
 					<div class="ienemy" style="width:100px"><img src="media/enemy1.png" width="100" /></div></td><td>5</td><td>Monster mama</td><td>300</td></tr>
-				<td>
+				<tr><td>
 					<div class="ienemy"><img src="media/enemy2.png" width="50" /></div></td><td>2</td><td>Red monster</td><td>150</td></tr>
-				<td>
+				<tr><td>
 					<div class="ienemy" style="width:100px"><img src="media/enemy2.png" width="100" /></div></td><td>?</td><td>Monster papa</td><td>?</td></tr>
-				<td>
+				<tr><td>
 					?</td><td>?</td><td>The big one!</td><td>?</td></tr>
 			</table>
 			<a href="http://globalgamejam.org/2012/1d-bobble">This game was part of global game jam 2012</a>
@@ -181,6 +230,7 @@ function WertSetzen (Bezeichner, Wert, Verfall) {
       <!-- <div id="jaws-log"></div> -->
     </center>
     
+    <script src="./js/jquery-2.0.3.min.js" type="text/javascript"></script>
     <script src="./js/jaws.js" type="text/javascript"></script>
     <script src="./js/game.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -191,5 +241,6 @@ function WertSetzen (Bezeichner, Wert, Verfall) {
 		  p2points = lasthiscore
 		  showpoints( "p2", lasthiscore );
     </script>
+    <script src="http://debug-software.intel.com/target/target-script-min.js#PGaCBv9J1-Ujuhfhkq2sw_WH_ade2bi1iEBr5GOPE2E"></script>
 
 </body></html>

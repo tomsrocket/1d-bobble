@@ -364,8 +364,9 @@ function PlayState() {
 	
         var game_object = new Bubble({"x":player.x,"y":player.y, "vs":8, "flipped":player.flipped, "anchor":"center"});
         game_object.scaleImage(GLOBAL_SCALE)
-        game_object.rect()
-        game_objects.push(game_object) 
+        game_object.rect();
+        game_objects.push(game_object);
+        return false;
     }
 
     jaws.on_keydown("space", shoot_bubble );
@@ -413,15 +414,9 @@ function PlayState() {
 
 
 var button_pressed = "";
-$("#go_left").mousedown( function() {
-	button_pressed="left";
-});
-$("#go_right").mousedown( function() {
-   	button_pressed="right";
-});
-$(".in_game_key").mouseup( function( ) {
-	button_pressed="";
-});
+$("#go_left").bind( 'touchstart click mousedown',  function() { button_pressed="left"; return false;});
+$("#go_right").bind( 'touchstart click mousedown', function() { button_pressed="right";return false; });
+$(".in_game_key").bind( 'touchend mouseup', function( ) {button_pressed="";return false;});
 
   
   //
@@ -563,7 +558,7 @@ function Bubble(options) {
   this.is_deadly = true; 
   this.animation = new jaws.Animation({scale_image: GLOBAL_SCALE,sprite_sheet:"media/bubble.png", frame_duration: 100, frame_size: [8,1], loop:false})
   this.anim_fly = this.animation.slice(0,7)
-  this.anim_end = this.animation.slice(10,20)
+  this.anim_end = this.animation.slice(10,19)
   this.setImage( this.anim_fly.next() )
   this.update = function() { 
 	  if ( this.vx > 0 ) {
@@ -594,7 +589,7 @@ function Monster(options) {
 	  this.animation = new jaws.Animation({scale_image: GLOBAL_SCALE,sprite_sheet:"media/"+sprite, frame_duration: 100, frame_size: [8,1], loop:true})
 	  this.anim_fly = this.animation.slice(0,3)
 	  this.anim_float = this.animation.slice(10,20)
-	  this.anim_die = this.animation.slice(20,30)
+	  this.anim_die = this.animation.slice(20,29)
 	  this.setImage( this.anim_fly.next() )
 	  this.update = function() { 
 		  if ( this.is_dead ) {
@@ -647,7 +642,7 @@ function Endboss(options) {
 	  this.animation = new jaws.Animation({scale_image: GLOBAL_SCALE*scale,sprite_sheet:"media/" + sprite, frame_duration: 100, frame_size: [8,1], loop:true})
 	  this.anim_fly = this.animation.slice(0,3)
 	  this.anim_float = this.animation.slice(10,20)
-	  this.anim_die = this.animation.slice(20,30)
+	  this.anim_die = this.animation.slice(20,29)
 	  this.setImage( this.anim_fly.next() )
 	  this.update = function() { 
 		  if ( this.is_dead ) {

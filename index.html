@@ -11,12 +11,15 @@ body {
   font: 11px verdana; 
   color: white; 
   margin-top: 60px; 
--webkit-touch-callout: none;
--webkit-user-select: none;
--khtml-user-select: none;
--moz-user-select: none;
--ms-user-select: none;
-user-select: none;  
+}
+* {
+	user-select: none;  
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
 }
 #canvas { border: #333333 1px solid; background: white; margin: 0px; }
 #topline {width:1000px;margin-top:45px; }
@@ -62,8 +65,8 @@ canvas {
 
 </style>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+
   <script src="intelxdk.js"></script>
   <script type="text/javascript">
     /* This code is used to run as soon as Intel activates */
